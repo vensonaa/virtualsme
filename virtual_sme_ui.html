@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual SME - Banking Expert Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.assistant .message-content {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.assistant .message-content::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 15px;
+            width: 0;
+            height: 0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-right: 8px solid white;
+        }
+
+        .message.user .message-content::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 15px;
+            width: 0;
+            height: 0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-left: 8px solid #667eea;
+        }
+
+        .chat-input {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input input:focus {
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .domain-selector {
+            margin-bottom: 25px;
+        }
+
+        .domain-selector h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.2rem;
+        }
+
+        .domain-checkboxes {
+            display: grid;
+            gap: 10px;
+        }
+
+        .domain-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .domain-checkbox:hover {
+            background: #e9ecef;
+        }
+
+        .domain-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #667eea;
+        }
+
+        .stats-section {
+            margin-top: 25px;
+        }
+
+        .stats-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.2rem;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .sources {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .sources h4 {
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .source-list {
+            list-style: none;
+        }
+
+        .source-list li {
+            padding: 5px 0;
+            color: #667eea;
+        }
+
+        .confidence {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #0abde3, #54a0ff);
+            transition: width 0.3s;
+        }
+
+        .domains-used {
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .domain-tag {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏦 Virtual SME</h1>
+            <p>Your AI Banking Expert Assistant</p>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="domain-selector">
+                    <h3>🎯 Select Domains</h3>
+                    <div class="domain-checkboxes">
+                        <label class="domain-checkbox">
+                            <input type="checkbox" value="distribution_finance" checked>
+                            <span>Distribution Finance</span>
+                        </label>
+                        <label class="domain-checkbox">
+                            <input type="checkbox" value="channel_finance" checked>
+                            <span>Channel Finance</span>
+                        </label>
+                        <label class="domain-checkbox">
+                            <input type="checkbox" value="global_trade_finance" checked>
+                            <span>Global Trade Finance</span>
+                        </label>
+                        <label class="domain-checkbox">
+                            <input type="checkbox" value="risk_management" checked>
+                            <span>Risk Management</span>
+                        </label>
+                        <label class="domain-checkbox">
+                            <input type="checkbox" value="compliance" checked>
+                            <span>Compliance</span>
+                        </label>
+                        <label class="domain-checkbox">
+                            <input type="checkbox" value="customer_service" checked>
+                            <span>Customer Service</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="stats-section">
+                    <h3>📊 Knowledge Base Stats</h3>
+                    <div id="stats-content">
+                        <div class="stat-item">
+                            <span>Total Documents:</span>
+                            <span id="total-docs">Loading...</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Vector Stores:</span>
+                            <span id="vector-stores">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h2>💬 Ask Your Banking Expert</h2>
+                    <p>Get comprehensive answers across all banking domains</p>
+                </div>
+
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message assistant">
+                        <div class="message-content">
+                            <strong>Virtual SME Assistant:</strong><br>
+                            Hello! I'm your Virtual SME assistant, trained across multiple banking domains including Distribution Finance, Channel Finance, Global Trade Finance, Risk Management, Compliance, and Customer Service. How can I help you today?
+                        </div>
+                    </div>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing your question across banking domains...</p>
+                </div>
+
+                <div class="chat-input">
+                    <div class="input-group">
+                        <input type="text" id="message-input" placeholder="Ask about banking processes, regulations, or best practices..." maxlength="500">
+                        <button class="send-btn" id="send-btn" onclick="sendMessage()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:7000';
+        let currentUserId = 'user_' + Date.now();
+
+        // Load stats on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+        });
+
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/stats`, {
+                    headers: {
+                        'Authorization': 'Bearer dummy-token'
+                    }
+                });
+                
+                if (response.ok) {
+                    const stats = await response.json();
+                    document.getElementById('total-docs').textContent = stats.total_documents || 0;
+                    document.getElementById('vector-stores').textContent = stats.vector_stores_initialized || 0;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // Add user message to chat
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('send-btn').disabled = true;
+
+            try {
+                // Get selected domains
+                const selectedDomains = Array.from(document.querySelectorAll('.domain-checkbox input:checked'))
+                    .map(cb => cb.value);
+
+                const response = await fetch(`${API_BASE_URL}/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer dummy-token'
+                    },
+                    body: JSON.stringify({
+                        query: message,
+                        user_id: currentUserId,
+                        preferred_domains: selectedDomains
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    addAssistantMessage(data);
+                } else {
+                    throw new Error('Failed to get response');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('Sorry, I encountered an error while processing your request. Please try again.', 'assistant');
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('send-btn').disabled = false;
+                input.focus();
+            }
+        }
+
+        function addMessage(content, sender) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = sender === 'user' ? content : `<strong>Virtual SME Assistant:</strong><br>${content}`;
+            
+            messageDiv.appendChild(contentDiv);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function addAssistantMessage(data) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message assistant';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            let content = `<strong>Virtual SME Assistant:</strong><br>${data.answer}`;
+            
+            // Add confidence indicator
+            if (data.confidence !== undefined) {
+                const confidencePercent = Math.round(data.confidence * 100);
+                content += `
+                    <div class="confidence">
+                        <div>Confidence: ${confidencePercent}%</div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${confidencePercent}%"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add domains used
+            if (data.domains_consulted && data.domains_consulted.length > 0) {
+                content += `
+                    <div class="domains-used">
+                        <strong>Domains consulted:</strong><br>
+                        ${data.domains_consulted.map(domain => 
+                            `<span class="domain-tag">${domain.replace('_', ' ').toUpperCase()}</span>`
+                        ).join(' ')}
+                    </div>
+                `;
+            }
+            
+            // Add sources
+            if (data.sources && data.sources.length > 0) {
+                content += `
+                    <div class="sources">
+                        <h4>📚 Sources:</h4>
+                        <ul class="source-list">
+                            ${data.sources.map(source => `<li>• ${source}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            contentDiv.innerHTML = content;
+            messageDiv.appendChild(contentDiv);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Handle Enter key
+        document.getElementById('message-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Handle domain selection changes
+        document.querySelectorAll('.domain-checkbox input').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const checkedBoxes = document.querySelectorAll('.domain-checkbox input:checked');
+                if (checkedBoxes.length === 0) {
+                    this.checked = true; // Prevent unchecking all domains
+                }
+            });
+        });
+    </script>
+</body>
+</html>

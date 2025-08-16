@@ -18,7 +18,6 @@ def add_sample_data():
             content=doc['content'],
             domain=BankingDomain(doc['domain']),
             source=doc['source'],
-            
             upload_date=datetime.utcnow(),
             metadata={"type": "sample", "category": "training"}
         )

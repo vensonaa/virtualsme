@@ -23,7 +23,7 @@ def run_command(command, description):
 def create_env_file():
     """Create .env file with required environment variables"""
     env_content = """# Virtual SME Configuration
-OPENAI_API_KEY=your_openai_api_key_here
+GROQ_API_KEY=your_groq_api_key_here
 
 # Database Configuration
 DATABASE_URL=sqlite:///virtual_sme.db

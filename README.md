@@ -46,7 +46,7 @@ The Virtual SME (Subject Matter Expert) solution addresses the critical need for
 ### Technology Stack
 
 - **Backend**: Python, FastAPI, SQLAlchemy
-- **AI/ML**: OpenAI GPT-4, LangChain, ChromaDB
+- **AI/ML**: Groq LLM, HuggingFace Embeddings, LangChain, ChromaDB
 - **Database**: SQLite (production: PostgreSQL)
 - **Frontend**: HTML5, CSS3, JavaScript
 - **Vector Store**: ChromaDB for semantic search
@@ -57,7 +57,7 @@ The Virtual SME (Subject Matter Expert) solution addresses the critical need for
 ### Prerequisites
 
 - Python 3.8 or higher
-- OpenAI API key
+- Groq API key
 - Git
 
 ### Installation
@@ -73,10 +73,16 @@ The Virtual SME (Subject Matter Expert) solution addresses the critical need for
    python setup.py
    ```
 
-3. **Update environment variables**
+3. **Setup Groq API key**
    ```bash
-   # Edit .env file and add your OpenAI API key
-   OPENAI_API_KEY=your_openai_api_key_here
+   python setup_groq.py
+   ```
+   This will guide you through setting up your Groq API key.
+
+4. **Update environment variables (if needed)**
+   ```bash
+   # Edit .env file and add your Groq API key
+   GROQ_API_KEY=your_groq_api_key_here
    ```
 
 4. **Activate virtual environment**
@@ -98,7 +104,12 @@ The Virtual SME (Subject Matter Expert) solution addresses the critical need for
    python virtual_sme_solution.py
    ```
 
-7. **Open the web interface**
+7. **Test Groq integration**
+   ```bash
+   python test_groq_integration.py
+   ```
+
+8. **Open the web interface**
    - Open `virtual_sme_ui.html` in your browser
    - Or access the API documentation at `http://localhost:8000/docs`
 
@@ -213,8 +224,8 @@ response = requests.post(
 Create a `.env` file with the following variables:
 
 ```env
-# OpenAI Configuration
-OPENAI_API_KEY=your_openai_api_key_here
+# API Configuration
+GROQ_API_KEY=your_groq_api_key_here
 
 # Database Configuration
 DATABASE_URL=sqlite:///virtual_sme.db
@@ -379,7 +390,8 @@ For support and questions:
 
 ## 📚 Additional Resources
 
-- [OpenAI API Documentation](https://platform.openai.com/docs)
+- [Groq API Documentation](https://console.groq.com/docs)
+
 - [LangChain Documentation](https://python.langchain.com/)
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
 - [ChromaDB Documentation](https://docs.trychroma.com/)

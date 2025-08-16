@@ -13,14 +13,14 @@ from dataclasses import dataclass
 from enum import Enum
 
 # AI/ML Libraries
-import openai
+import groq
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
-from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_groq import ChatGroq
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader, TextLoader, CSVLoader
-from langchain.chat_models import ChatOpenAI
 from langchain.schema import Document
 
 # FastAPI for web interface
@@ -38,6 +38,7 @@ from sqlalchemy.orm import sessionmaker
 
 # Configuration
 from dotenv import load_dotenv
+from groq_config import DEFAULT_MODEL, DEFAULT_EMBEDDING_MODEL, DEFAULT_TEMPERATURE
 
 load_dotenv()
 
@@ -120,11 +121,18 @@ class DocumentUploadRequest(BaseModel):
 
 class VirtualSMESystem:
     def __init__(self):
-        self.embeddings = OpenAIEmbeddings(api_key=os.getenv("OPENAI_API_KEY"))
-        self.llm = ChatOpenAI(
-            model_name="gpt-4",
-            temperature=0.1,
-            api_key=os.getenv("OPENAI_API_KEY")
+        # Using HuggingFace embeddings (free, local) with Groq LLM
+        # This provides a complete solution without requiring OpenAI API
+        self.embeddings = HuggingFaceEmbeddings(
+            model_name=DEFAULT_EMBEDDING_MODEL,
+            model_kwargs={'device': 'cpu'}
+        )
+        # Using Groq's Llama3-8b model for fast, cost-effective inference
+        # Alternative models: "mixtral-8x7b-32768", "llama3-70b-8192", "gemma2-9b-it"
+        self.llm = ChatGroq(
+            model_name=DEFAULT_MODEL,
+            temperature=DEFAULT_TEMPERATURE,
+            api_key=os.getenv("GROQ_API_KEY")
         )
         
         # Initialize vector stores for each domain
